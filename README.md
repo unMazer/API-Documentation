@@ -6,4 +6,6 @@ To make any changes in the documentation edit the yaml file and build it using c
 
 ## Changing the domain name for the Api Documentation
 Add a CNAME record inside the `doc` folder either manually or through settings of the repo and add that CNAME to the DNS settings of the Godaddy Domain. 
+
+https://unmazer-ai.gitbook.io/product-docs/
  

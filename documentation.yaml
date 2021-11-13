@@ -1,0 +1,2090 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: UnMazer.AI API Documentation
+  termsOfService: 'https://www.unmazer.ai/home/terms-conditions'
+  contact:
+    email: sales@unmazer.ai
+    url: 'https://www.unmazer.ai'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  x-logo:
+    url : 'https://github.com/unMazer/API-Documentation/blob/main/docs/logo.png?raw=true'
+  description: These APIs are created and maintained by UnMazer.AI
+
+tags:
+  - name: FootFall Data
+    # x-displayName: Data
+    description: These API Endpoint are used to retrieve footfall analysis data.
+  - name: FootFall Task
+    # x-displayName: Task
+    description: These API Endpoint are used to footfall analysis for a given Polygon. Polygon can be custom drawn by a user or output of the viewshed API.
+  - name: Viewshed Data
+    # x-displayName: Data
+    description: These API Endpoint are used to retrieve viewshed analysis data.
+  - name: Viewshed Task
+    description: Analyse location's visibility and foot traffic for setting up new BillBoards/Hoardings for offline marketing
+    # x-displayName: Task
+  - name: Home Location Finder
+    # x-traitTag: true
+  - name : Heat Maps
+  - name : Custom Polygon Data
+  - name : Similar Neighborhood
+
+x-tagGroups:
+  - name: FootFall Analysis
+    tags:
+      - FootFall Data
+      - FootFall Task
+    
+  - name: Vewshed Analysis
+    tags:
+      - Viewshed Data
+      - Viewshed Task
+
+  - name: Spatial Analysis
+    tags:
+      - Custom Polygon Data
+      - Similar Neighborhood
+      - Heat Maps
+  - name: Home Location Finder
+    tags:
+      - Home Location Finder
+    
+servers: []
+paths:
+  /footfall/task:
+    post:
+      tags: 
+        - FootFall Task
+      summary: /footfall/task
+      operationId: FootFall Analysis
+      responses:
+        '202': 
+          description: "Accepted"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 'ID of the Task'
+                x-examples:
+                  application/json:
+                    example-1:
+                      id: '1234'
+              examples:
+                Sample Response:
+                  value:
+                    id: '1234'
+        '400': 
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: 'Message string will contain validation error message.'
+              examples:
+                  Place Name not Found:
+                      value:
+                        message: 'Need to provide a place name.'
+                  Polygon Coordinates not Found:
+                      value:
+                        message: 'Need to provide the coordinates.'
+                  Already Exist in Database:
+                      value:
+                        message: 'Given coordinates already exists in the database.'
+                  Area Validation Error:
+                      value:
+                        message: 'Area of polygon formed by the given coordinates is not within 0.05km^2 and 12.56km^2 limit'
+              
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                place_name:
+                  type: string
+                  description : "Name of the Location"
+                coordinates:
+                  type: array
+                  description: "Geometry of the location"
+                  uniqueItems: true
+                  minItems: 1
+                  items:
+                    required:
+                      - longitude
+                      - latitude
+                    properties:
+                      longitude:
+                        type: number 
+                        description: "Longitude of the point"                
+                      latitude:
+                        type: number
+                        description: "Latitude of the point"
+              required:
+                - place_name
+                - coordinates
+            examples:
+              Sample Request:
+                value:
+                  place_name : "location"
+                  coordinates:
+                    - latitude: 77.61174827814102
+                      longitude: 12.935334392490226
+                    - latitude: 77.61136204004288
+                      longitude: 12.935180157977092
+                    - latitude: 77.61105358600616
+                      longitude: 12.93500239604705
+                    - latitude: 77.61071026325226
+                      longitude: 12.93457890387987
+                    - latitude: 77.61053591966629
+                      longitude: 12.934239063966542
+                    - latitude: 77.61117428541183
+                      longitude: 12.933742374029716
+                    - latitude: 77.61149615049362
+                      longitude: 12.934231221501534
+                    - latitude: 77.61213719844817
+                      longitude: 12.934615501996769
+                    - latitude: 77.61174827814102
+                      longitude: 12.935334392490226
+      description: This Endpoint is to submit request to perform footfall analysis on a polygon using UnMazer.AI's Footfall Analysis API.
+      parameters: []
+  /task/{task_id}:
+    get:
+      tags:
+        - FootFall Task
+        - Viewshed Task
+      summary: /task/{task_id}
+      operationId: FootFall Analysis
+      responses:
+        '200': 
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 'ID of the task'
+                  state:
+                    type: string
+                    description: 'State of the Task'
+                    enum : 
+                        - SUCCESS 
+                        - FAILURE
+                        - PROGRESS
+                  result:
+                    type: object
+                    x-nullable: true
+                    description: 'Result of the Task (NONE if ERROR encounter)'
+                    properties:
+                      current:
+                        type: string
+                        description: "Index of currently running function"
+                      function:
+                        type: string
+                        description: "Current executing function name"
+                      total:
+                        type: string
+                        description: "Total number functions to execute"
+                  error:
+                    type: string
+                    x-nullable: true
+                    description: 'Error message will be present if request resulted in error and its compelete traceback'
+                x-examples:
+                  application/json:
+                    example-1:
+                      id: '1234'
+              examples:
+                PROGRESS:
+                  value:
+                    id: '1234'
+                    status: 'PROGRESS'
+                    result: 
+                        "current": "1"                  
+                        "function": "footfall_finder" 
+                        "total": "s"
+                    error: None
+                ERROR:
+                  value:
+                    id: '1234'
+                    status: 'FAILURE'
+                    error: "GPU Memory limit execeed..."
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                task_id:
+                  type: string
+                  decription: "ID of the task"
+              required:
+                - task_id
+            examples:
+              Sample Request:
+                value:
+                  task_id : "1234"
+      description: This Endpoint is to submit request to get status of a particular task using Task ID. 
+      parameters: []
+  /footfall/place-names:
+    get:
+      tags:
+        - FootFall Data
+      summary: /footfall/place-names
+      operationId: FootFall Analysis
+      responses:
+        '200': 
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    x-nullable: true
+                    description: 'Array of Place Names in Database'
+                    items:  
+                      type: string
+              examples:
+                Data Exist:
+                  value:
+                    - 'Forum Mall'
+                    - 'ITI Hospital'
+                    - 'Coffee Shop'
+                Empty Database:
+                  value:
+                    - 
+      description: This Endpoint is to get list of place name from the database who's footfall analysis has been compeleted.
+      parameters: []
+  /footfall/data/{place-name}:
+    get:
+      tags: 
+        - FootFall Data 
+      summary: /footfall/data/{place-name}
+      operationId: FootFall Analysis
+      responses:
+        '200': 
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                description: 'Return the footfall analyis data corresponding to the given place name.'
+                type: object
+                properties:
+                      place_name : 
+                        type: string
+                        description: "Name of the location"
+                      geometry : 
+                        type: object
+                        description: "Geometry of the location polygon"
+                        properties:
+                          type: 
+                            type: string
+                            description: "Type of geometry"
+                          coordiantes: 
+                            type : array
+                            description: "Geometry of the location"
+                            items:
+                                type: array
+                                description: "Array of coordinates"
+                                items:
+                                  type: "Longitude and Latitude"
+
+                      error: 
+                        type: string
+                        x-nullable: true
+                        description:  "Error message will be present in case Task was unsuccessful"
+                      statistics: 
+                        type: object
+                        x-nullable: true
+                        description: "Statistics of the footfall traffic of the location. Will not be present in case of Error"
+                        properties:
+                          total_visits:
+                            type: number
+                            description: "Total Visit Count for the location"
+                          total_unique_visitors : 
+                            type: number
+                            description: "Total Unique visitors of the location"
+                          avg_length_of_stay :
+                            type: number 
+                            description: "Average lenght of stay in the location of each visitor"
+                          avg_hourly_visits : 
+                            type: number
+                            description: "Average visit per hour in the location"
+                          avg_daily_visits : 
+                            type: number
+                            description: "Average visit per day in the location"
+                          avg_weekly_visits : 
+                            type: number
+                            description: "Average visit per week in the location"
+                          avg_customer_visits : 
+                            type: number
+                            description: "Average number of visits made by visitors to the location"
+                          loyal_customer_percentage : 
+                            type: number
+                            description: "Percetage of customers who visited the location two consecutive months"
+                          lost_customer_percentage : 
+                            type: number
+                            description: "Percentage of customers who visited the location last month but not current month"
+                          new_customer_percentage : 
+                            type: number
+                            description: "Percentage of customers who visited the location did not last month but did current month"
+                          daily_visits : 
+                            type: object
+                            description: "Daily visit count of the location"
+                            properties:
+                              day:
+                                type: array
+                                description: "Day number"
+                                items:
+                                  type: number
+                              visits:
+                                type: array
+                                description: "Visit count of each day"
+                                items:
+                                  type: number
+                          weekly_visits : 
+                              type: object
+                              description: "Weekly visit count of the location"
+                              properties:
+                                week:
+                                  type: array
+                                  description: "Week number"
+                                  items:
+                                    type: number
+                                visits:
+                                  type: array
+                                  description: "Visit count of each week"
+                                  items:
+                                    type: number                           
+                          hourly_visits : 
+                            type: object
+                            description: "Average hourly visit count of the location"
+                            properties:
+                              hour:
+                                type: array
+                                description: "Hour number"
+                                items:
+                                  type: number
+                              visits:
+                                type: array
+                                description: "Visit count of each hour"
+                                items:
+                                  type: number
+                          detailed_hourly_visits:
+                            type: object
+                            description: "Daily Hourly visit count of the location"
+                            properties:
+                              hour:
+                                type: array
+                                description: "Hour number"
+                                items:
+                                  type: number
+                              day:
+                                type: array
+                                description: "Day number"
+                                items:
+                                  type: number
+                              week:
+                                type: array
+                                description: "Week number"
+                                items:
+                                  type: number
+                              visits:
+                                type: array
+                                description: "Visit Count of specific hour of the day of a week"
+                                items:
+                                  type: number                          
+                      cross_shopping : 
+                        type : object
+                        x-nullable: true
+                        description: "Cross Shopping information for the location. Will not be present in case of Error"
+                        properties:
+                          pre_visits:
+                            type: object  
+                            description: "Visitors location history before visiting the location. {'A' : 10} means 10 percent of the users were at location A before they visited the location being analysed"
+                          post_visit:
+                            type: object
+                            description: "Visitors location history after visiting the location. {'A' : 10} means 10 percent of the users were at location A before they visited the location being analysed"
+                      popular_area : 
+                        type : object
+                        x-nullable: true
+                        description: "Popular Areas near the location. Will not be present in case of Error"
+                        properties:
+                          place:
+                            type: array
+                            description: "List of name of popular places"
+                            items:
+                              type: string
+                          category:
+                            type: array
+                            description: "List of catergory of popular places corresponding to the name"
+                            items:
+                              type: string
+                      trade_area : 
+                        type : object
+                        x-nullable: true
+                        description: "Trade Area/ Home location and other related info of the people who visited the location. Will not be present in case of Error"
+                        properties:
+                          mobile_ad_id:
+                            type: array
+                            description : "Mobile AD ID of the visitiors"
+                            items:
+                              type: string
+                          latitude:
+                            type: array
+                            description : "Latitude of the home location of the visitors"
+                            items:
+                              type: number
+                          longitude:
+                            type: array
+                            description : "Longitude of the home location of the visitors"
+                            items:
+                              type: number
+                          distance:
+                            type: array
+                            description : "Distance between visitor's home location and location that is being analysed"
+                            items:
+                              type: number
+                          bin:
+                            type: array
+                            description : "Bin number of the distance"
+                            items:
+                              type: number
+                          shopper_type:
+                            type: array
+                            description : "Visitor's shopper type (Premium Shopper/ Average Shopper/ Thrifty Shopper)"
+                            items:
+                              type: number
+                          college_student:
+                            type: array
+                            description : "Visitor's current college student status (YES/NO)"
+                            items:
+                              type: number
+                      frequent_path : 
+                        type : object
+                        x-nullable: true
+                        description: "Major Path used by the people to reach the location. Will not be present in case of Error"
+                        properties:
+                          pre_visits:
+                            type: array
+                            description: "Paths taken by visitors to reach the location"
+                            items:
+                                type: object
+                                description: "Geometry of the location polygon"
+                                properties:
+                                  type: 
+                                    type: string
+                                    description: "Type of geometry"
+                                  coordiantes: 
+                                    type : array
+                                    description: "geometry of the location"
+                                    items:
+                                        type: array
+                                        description: "Array of coordinates"
+                                        items:
+                                          type: 
+                                            - "Longitude and Latitude"
+                          post_visits:
+                            type: array
+                            description: "Paths taken by visitors after they left the location"
+                            items:
+                                type: object
+                                description: "Geometry of the location polygon"
+                                properties:
+                                  type: 
+                                    type: string
+                                    description: "Type of geometry"
+                                  coordiantes: 
+                                    type : array
+                                    description: "geometry of the location"
+                                    items:
+                                        type: array
+                                        description: "Array of coordinates"
+                                        items:
+                                          type: 
+                                            - "Longitude and Latitude"        
+              examples:
+                PINGS FOUND:
+                  value:
+                    place-name: 'location'
+                    geometry: 
+                      type : "Polygon"
+                      coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                    statistics:
+                      total_visits: 1592
+                      total_unique_visitors: 1281
+                      avg_length_of_stay: 130.20051413881748
+                      avg_hourly_visits: 4.96
+                      avg_daily_visits: 45.48
+                      avg_weekly_visits: 265.33
+                      avg_customer_visits: 1.24
+                      loyal_customer_percentage: 9.523
+                      lost_customer_percentage: 90.47
+                      new_customer_percentage: 18.34
+                      daily_visits:
+                        day: 
+                          - 1
+                          - 2
+                        visits:
+                          - 100
+                          - 200
+                      weekly_visits:
+                        week: 
+                          - 1
+                          - 2
+                        visits:
+                          - 100
+                          - 200
+                      hourly_visits:
+                        hour: 
+                          - 1
+                          - 2
+                        visits:
+                          - 100
+                          - 200
+                      detailed_hourly_visits:
+                        hour: 
+                          - 1
+                          - 2
+                        day:
+                          - 100
+                          - 200                       
+                        week: 
+                          - 1
+                          - 2
+                        visits:
+                          - 100
+                          - 200
+                    cross_shopping:
+                      pre_visit:
+                        "A" : "10"
+                        "B" : "20"
+                      post_visit:
+                        "A" : "10"
+                        "B" : "20"
+                    popular_area:
+                      places:
+                        - A
+                        - B
+                      category:
+                        - C
+                        - D
+                    trade_area:
+                      mobile_ad_id: 
+                        - "A"
+                        - "B"
+                      latitude:
+                        - 10.2
+                        - 23.2
+                      longitude:
+                        - 10.2
+                        - 23.2
+                      distance:
+                        - 10.2
+                        - 23.2
+                      bin:
+                        - 15
+                        - 20
+                      shopper_type:
+                        - "YES"
+                        - "NO"
+                      college_student:
+                        - "NO"
+                        - "YES"
+                    frequent_path:
+                        pre_visits:
+                          - type: "LineString"
+                            coordinates:
+                              - 
+                                - 77.61174827814102
+                                - 12.935334392490226
+                              - 
+                                - 77.61136204004288
+                                -  12.935180157977092
+                          - type: "LineString"
+                            coordinates:
+                              - 
+                                - 77.61174827814102
+                                - 12.935334392490226
+                              - 
+                                - 77.61136204004288
+                                -  12.935180157977092
+                        post_visits:
+                          - type: "LineString"
+                            coordinates:
+                              - 
+                                - 77.61174827814102
+                                - 12.935334392490226
+                              - 
+                                - 77.61136204004288
+                                -  12.935180157977092
+                          - type: "LineString"
+                            coordinates:
+                              - 
+                                - 77.61174827814102
+                                - 12.935334392490226
+                              - 
+                                - 77.61136204004288
+                                -  12.935180157977092
+                PINGS NOT FOUND:
+                  value:
+                    place-name: 'location'
+                    geometry: 
+                      type : "Polygon"
+                      coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                    error: "Not enough visit pings found for 'test' to perform footfall analysis. This is most likely due to the location being outside the demo area. Please try again with a different location."
+
+        '404': 
+          description: "Not Found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "Error message from the API"
+              examples:
+                  Empty Database:
+                      value:
+                        message: 'No data found for {place_name}'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                place_name:
+                  type: string
+                  description: "Place Name to be retrieved"
+              required:
+                - place_name
+            examples:
+              Sample Request:
+                value:
+                  place_name : "location"
+      description: This Endpoint will return the footfall analysis data corresponding to the given place name.
+      parameters: []
+  /viewshed/task:
+    post:
+      tags: 
+        - Viewshed Task
+      summary: /viewshed/task
+      operationId: Viewshed Analysis
+      responses:
+        '202': 
+          description: "Accepted"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 'ID of the Task'
+              examples:
+                Sample Response:
+                  value:
+                    id: '1234'
+        '400': 
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: 'Message string will contain validation error message.'
+              examples:
+                  Place Name not Found:
+                      value:
+                        message: 'Need to provide a place name.'
+                  Location Coordinates not Found:
+                      value:
+                        message: 'Need to provide the coordinates.'
+                  Already Exist in Database:
+                      value:
+                        message: 'Given coordinates already exists in the database.'
+                  Location Validation Error:
+                      value:
+                        message: 'Given coordinates of the point is not within the demo API bounds'
+              
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                place_name:
+                  type: string
+                  description : "Name of the Location"
+                coordinates:
+                  type: array
+                  description: "Coordiantes of the location"
+                  uniqueItems: true
+                  minItems: 1
+                  items:
+                    required:
+                      - longitude
+                      - latitude
+                    properties:
+                      longitude:
+                        type: number 
+                        description: "Longitude of the point"                
+                      latitude:
+                        type: number
+                        description: "Latitude of the point"
+                radius:
+                  type: number
+                  default: 300
+                  description: 'Radius in meters for viewshed visibility analysis'
+                target_height:
+                  type: number
+                  default: 10
+                  description: 'Height of the billboard/hoarding in meters'
+                start_angle:
+                  type: number
+                  default: 0
+                  description: 'Start angle in degree for viewshed angle of view'
+                end_angle:
+                  type: number
+                  default: 360
+                  description: 'End angle in degree for viewshed angle of view'
+                store_geometry:
+                  default: 
+                  type: array
+                  x-nullable: true
+                  description: "Geometry of the store location"
+                  uniqueItems: true
+                  items:
+                    required:
+                      - longitude
+                      - latitude
+                    properties:
+                      longitude:
+                        type: number 
+                        description: "Longitude of the point"                
+                      latitude:
+                        type: number
+                        description: "Latitude of the point"
+                competitor_geometry:
+                  default: 
+                  type: array
+                  x-nullable: true
+                  description: "Geometry of the competitor's store location"
+                  uniqueItems: true
+                  items:
+                    required:
+                      - longitude
+                      - latitude
+                    properties:
+                      longitude:
+                        type: number 
+                        description: "Longitude of the point"                
+                      latitude:
+                        type: number
+                        description: "Latitude of the point"
+              required:
+                - place_name
+                - coordinates
+            examples:
+              Sample Request:
+                value:
+                  place_name : "location"
+                  coordinates:
+                    - latitude: 77.61174827814102
+                      longitude: 12.935334392490226
+                  store_geometry : 
+                        type : "Polygon"
+                        coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                  radius : 230
+                  target_height : 5
+                  start_angle : 90
+                  end_angle : 180
+      description: This Endpoint is to submit request to perform viewshed analysis of a coordinate using UnMazer.AI's Viewshed Analysis API 
+      parameters: []
+  /viewshed/place-names:
+    get:
+      tags:
+        - Viewshed Data
+      summary: /viewshed/place-names
+      operationId: Viewshed Analysis
+      responses:
+        '200': 
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                x-nullable: true
+                properties:
+                  items:
+                    type: array
+                    description: 'Array of Place Names in Database'
+                    items:  
+                      type: string
+              examples:
+                Data Exist:
+                  value:
+                    - 'Gandhi Road Billboard'
+                    - 'MK Tower Hoarding'
+                Empty Database:
+                  value:
+                    - 
+      description: This Endpoint is to get list of place name from the database who's viewshed analysis has been compeleted.
+      parameters: []
+  /viewshed/data/{place-name}:
+    get:
+      tags: 
+        - Viewshed Data 
+      summary: /viewshed/data/{place-name}
+      operationId: Viewshed Analysis
+      responses:
+        '200': 
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                description: 'Return the viewshed analyis data corresponding to the given place name.'
+                type: object
+                properties:
+                  place_name : 
+                    type: string
+                    description: "Name of the location"
+                  coordinates : 
+                    type: object
+                    description: "Geometry of the location polygon"
+                    properties:
+                      type: 
+                        type: string
+                        description: "Type of geometry"
+                      coordiantes: 
+                        type : array
+                        description: "Geometry of the location"
+                        items:
+                            type: array
+                            description: "Array of coordinates"
+                            items:
+                              type: "Longitude and Latitude"
+                  viewshed_geometry : 
+                    type: object
+                    x-nullable: true
+                    description: "Geometry of the location polygon"
+                    properties:
+                      type: 
+                        type: string
+                        description: "Type of geometry"
+                      coordiantes: 
+                        type : array
+                        description: "Geometry of the location"
+                        items:
+                            type: array
+                            description: "Array of coordinates"
+                            items:
+                              type: "Longitude and Latitude"
+                  store_geometry : 
+                    type: object
+                    x-nullable: true
+                    description: "Geometry of the location polygon"
+                    properties:
+                      type: 
+                        type: string
+                        description: "Type of geometry"
+                      coordinates: 
+                        type : array
+                        description: "Geometry of the store polygon"
+                        items:
+                            type: array
+                            description: "Array of coordinates"
+                            items:
+                              type: "Longitude and Latitude"
+                  competitor_geometry : 
+                    type: object
+                    x-nullable: true
+                    description: "Geometry of the competitor's store polygon"
+                    properties:
+                      type: 
+                        type: string
+                        description: "Type of geometry"
+                      coordinates: 
+                        type : array
+                        description: "Geometry of the location"
+                        items:
+                            type: array
+                            description: "Array of coordinates"
+                            items:
+                              type: "Longitude and Latitude"
+                  radius:
+                    type: number
+                    description: 'Radius in meters for viewshed visibility analysis'
+                  target_height:
+                    type: number
+                    description: 'Height of the billboard/hoarding in meters'
+                  start_angle:
+                    type: number
+                    description: 'Start angle in degree for viewshed angle of view'
+                  end_angle:
+                    type: number
+                    description: 'End angle in degree for viewshed angle of view'
+                  angle:
+                    type: number
+                    description: "Angle of view of the viewshed"
+                  image : 
+                    type : bytes
+                    x-nullable: true
+                    description: "PNG image of the location's viewshed. Red depicts area from where billboard is not visible. Green depicts area from where billboard is visible"
+                  daily_activity : 
+                    type: object
+                    x-nullable: true
+                    description: "Daily visit activity in percentage of the location"
+                    properties:
+                      day:
+                        type: array
+                        description: "Day number"
+                        items:
+                          type: number
+                      activity:
+                        type: array
+                        description: "Visit activity of each day"
+                        items:
+                          type: number
+                  hourly_activity : 
+                    type: object
+                    x-nullable: true
+                    description: "Average hourly visit activity in percentage of the location"
+                    properties:
+                      hour:
+                        type: array
+                        description: "Hour number"
+                        items:
+                          type: number
+                      activity:
+                        type: array
+                        description: "Visit activity of each hour"
+                        items:
+                          type: number
+                  score :   
+                    type : number
+                    x-nullable: true
+                    description: "UnMazer.AI viewshed score for the location."
+                  error: 
+                    type: string
+                    x-nullable: true
+                    description:  "Error message will be present in case Task was unsuccessful"
+                      
+              examples:
+                PINGS FOUND:
+                  value:
+                    place-name: 'location'
+                    coordinates: 
+                      type : "Point"
+                      coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                    viewshed_geometry : 
+                        type : "Polygon"
+                        coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                    store_geometry : 
+                        type : "Polygon"
+                        coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                    competitor_geometry :
+                    radius : 230
+                    target_height : 5
+                    start_angle : 90
+                    end_angle : 180
+                    angle : 90
+                    daily_activity:
+                      day: 
+                        - 1
+                        - 2
+                      activity:
+                        - 100
+                        - 200
+                    hourly_activity:
+                      hour: 
+                        - 1
+                        - 2
+                      activity:
+                        - 100
+                        - 200
+                    image : 'b 76 69 65 77 73 68 65 64 20 69 6d 61 67 65'
+                    score : 23
+
+
+                PINGS NOT FOUND:
+                  value:
+                    place-name: 'location'
+                    coordinates: 
+                      type : "Point"
+                      coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                    viewshed_geometry : 
+                        type : "Polygon"
+                        coordinates:
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                        - 
+                          - 77.61174827814102
+                          - 12.935334392490226
+                        - 
+                          - 77.61136204004288
+                          -  12.935180157977092
+                    radius : 230
+                    target_height : 5
+                    start_angle : 90
+                    end_angle : 180
+                    angle : 90
+                    image : 'b 76 69 65 77 73 68 65 64 20 69 6d 61 67 65'
+                    error: "Not enough visit pings found for 'test' to perform footfall analysis. This is most likely due to the location being outside the demo area. Please try again with a different location."
+        '404': 
+          description: "Not Found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "Error message from the API"
+              examples:
+                  Empty Database:
+                      value:
+                        message: 'No data found for {place_name}'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                place_name:
+                  type: string
+                  description: "Place Name to be retrieved"
+              required:
+                - place_name
+            examples:
+              Sample Request:
+                value:
+                  place_name : "location"
+      description: This Endpoint will return the viewshed analysis data corresponding to the given place name.
+      parameters: []
+
+  /post_json:
+    post:
+      summary: Custom Polygon
+      operationId: Custom Polygon Data
+      tags: 
+        - Custom Polygon Data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  Area:
+                    type: string
+                    minLength: 1
+                  Demographics:
+                    type: object
+                    properties:
+                      Female:
+                        type: string
+                        minLength: 1
+                      Houses:
+                        type: string
+                        minLength: 1
+                      Male:
+                        type: string
+                        minLength: 1
+                      Population:
+                        type: string
+                        minLength: 1
+                    required:
+                      - Female
+                      - Houses
+                      - Male
+                      - Population
+                  Infra:
+                    type: object
+                    properties:
+                      Apartments:
+                        type: string
+                        minLength: 1
+                      Bus Stops:
+                        type: string
+                        minLength: 1
+                      Cinemas:
+                        type: string
+                        minLength: 1
+                      Colleges:
+                        type: string
+                        minLength: 1
+                      Grocery_Stores:
+                        type: string
+                        minLength: 1
+                      Gyms:
+                        type: string
+                        minLength: 1
+                      Office Parks:
+                        type: string
+                        minLength: 1
+                      Pan Shops:
+                        type: string
+                        minLength: 1
+                      Police stations:
+                        type: string
+                        minLength: 1
+                      Restaurants:
+                        type: string
+                        minLength: 1
+                      Sports Club:
+                        type: string
+                        minLength: 1
+                      Warehouse and Godowns:
+                        type: string
+                        minLength: 1
+                    required:
+                      - Apartments
+                      - Bus Stops
+                      - Cinemas
+                      - Colleges
+                      - Grocery_Stores
+                      - Gyms
+                      - Office Parks
+                      - Pan Shops
+                      - Police stations
+                      - Restaurants
+                      - Sports Club
+                      - Warehouse and Godowns
+                required:
+                  - Area
+                  - Demographics
+                  - Infra
+                x-examples:
+                  example-1:
+                    Area: '2133880086'
+                    Demographics:
+                      Female: '3431369'
+                      Houses: '2648272'
+                      Male: '3050565'
+                      Population: '6481934'
+                    Infra:
+                      Apartments: '41'
+                      Bus Stops: '1079'
+                      Cinemas: '124'
+                      Colleges: '1977'
+                      Grocery_Stores: '505'
+                      Gyms: '778'
+                      Office Parks: '18'
+                      Pan Shops: '399'
+                      Police stations: '109'
+                      Restaurants: '2061'
+                      Sports Club: '28'
+                      Warehouse and Godowns: '1707'
+              examples:
+                Sample Response:
+                  value:
+                    Area: '2133880086'
+                    Demographics:
+                      Female: '3431369'
+                      Houses: '2648272'
+                      Male: '3050565'
+                      Population: '6481934'
+                    Infra:
+                      Apartments: '41'
+                      Bus Stops: '1079'
+                      Cinemas: '124'
+                      Colleges: '1977'
+                      Grocery_Stores: '505'
+                      Gyms: '778'
+                      Office Parks: '18'
+                      Pan Shops: '399'
+                      Police stations: '109'
+                      Restaurants: '2061'
+                      Sports Club: '28'
+                      Warehouse and Godowns: '1707'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                coordinates:
+                  type: array
+                  uniqueItems: true
+                  minItems: 1
+                  items:
+                    required:
+                      - lat
+                      - lng
+                    properties:
+                      lat:
+                        type: number
+                      lng:
+                        type: number
+              required:
+                - coordinates
+              x-examples:
+                example-1:
+                  coordinates:
+                    - lat: 13.388617618153711
+                      lng: 77.57514029874933
+                    - lat: 12.81883149952699
+                      lng: 77.03310705621149
+                    - lat: 12.752539132573569
+                      lng: 77.59368896484375
+            examples:
+              Sample Request:
+                value:
+                  coordinates:
+                    - lat: 13.388617618153711
+                      lng: 77.57514029874933
+                    - lat: 12.81883149952699
+                      lng: 77.03310705621149
+                    - lat: 12.752539132573569
+                      lng: 77.59368896484375
+        description: Post the necessary fields for the API to create a new user.
+      description: Lets a User Draw any Custom Polygon and returns various kinds of Variables.
+      parameters: []
+    parameters: []
+
+  /isochrone_api:
+    post:
+      summary: Isochrone Data
+      operationId: post-isochrone_api
+      tags: 
+        - Custom Polygon Data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  coordinates:
+                    type: object
+                    properties:
+                      lat:
+                        type: number
+                      lng:
+                        type: number
+                    required:
+                      - lat
+                      - lng
+                  data:
+                    type: object
+                    properties:
+                      Demographics:
+                        type: object
+                        properties:
+                          Female:
+                            type: string
+                            minLength: 1
+                          Houses:
+                            type: string
+                            minLength: 1
+                          Male:
+                            type: string
+                            minLength: 1
+                          Population:
+                            type: string
+                            minLength: 1
+                        required:
+                          - Female
+                          - Houses
+                          - Male
+                          - Population
+                      Infra:
+                        type: object
+                        properties:
+                          Apartments:
+                            type: string
+                            minLength: 1
+                          Bus Stops:
+                            type: string
+                            minLength: 1
+                          Cinemas:
+                            type: string
+                            minLength: 1
+                          Colleges:
+                            type: string
+                            minLength: 1
+                          Grocery_Stores:
+                            type: string
+                            minLength: 1
+                          Gyms:
+                            type: string
+                            minLength: 1
+                          Office Parks:
+                            type: string
+                            minLength: 1
+                          Pan Shops:
+                            type: string
+                            minLength: 1
+                          Police stations:
+                            type: string
+                            minLength: 1
+                          Restaurants:
+                            type: string
+                            minLength: 1
+                          Sports Club:
+                            type: string
+                            minLength: 1
+                          Warehouse and Godowns:
+                            type: string
+                            minLength: 1
+                        required:
+                          - Apartments
+                          - Bus Stops
+                          - Cinemas
+                          - Colleges
+                          - Grocery_Stores
+                          - Gyms
+                          - Office Parks
+                          - Pan Shops
+                          - Police stations
+                          - Restaurants
+                          - Sports Club
+                          - Warehouse and Godowns
+                    required:
+                      - Demographics
+                      - Infra
+                required:
+                  - coordinates
+                  - data
+                x-examples:
+                  example-1:
+                    coordinates:
+                      lat: 13.388617618153711
+                      lng: 77.57514029874933
+                    data:
+                      Demographics:
+                        Female: '4857320'
+                        Houses: '3476412'
+                        Male: '4379339'
+                        Population: '9236659'
+                      Infra:
+                        Apartments: '119'
+                        Bus Stops: '1850'
+                        Cinemas: '207'
+                        Colleges: '3667'
+                        Grocery_Stores: '1412'
+                        Gyms: '1575'
+                        Office Parks: '119'
+                        Pan Shops: '966'
+                        Police stations: '220'
+                        Restaurants: '6685'
+                        Sports Club: '48'
+                        Warehouse and Godowns: '1869'
+              examples:
+                Sample Resonse:
+                  value:
+                    coordinates:
+                      - - 77.6336
+                        - 13.110966
+                      - - 77.6326
+                        - 13.110102
+                      - - 77.6336
+                        - 13.110966
+                    data:
+                      Demographics:
+                        Female: '4857320'
+                        Houses: '3476412'
+                        Male: '4379339'
+                        Population: '9236659'
+                      Infra:
+                        Apartments: '119'
+                        Bus Stops: '1850'
+                        Cinemas: '207'
+                        Colleges: '3667'
+                        Grocery_Stores: '1412'
+                        Gyms: '1575'
+                        Office Parks: '119'
+                        Pan Shops: '966'
+                        Police stations: '220'
+                        Restaurants: '6685'
+                        Sports Club: '48'
+                        Warehouse and Godowns: '1869'
+      description: 'The Isochrone API computes areas that are reachable within a specified amount of time from a location, and returns the reachable regions as contours of polygons or lines that you can display on a map and also returns details about infrastructure and demographics of reachable regions.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  coordinates: '77.5946,12.9716'
+                  profile: cycling
+                  contours_minutes: '15'
+              properties:
+                coordinates:
+                  type: string
+                  minLength: 1
+                profile:
+                  type: string
+                  minLength: 1
+                contours_minutes:
+                  type: string
+                  minLength: 1
+            examples:
+              Sample Request:
+                value:
+                  coordinates: '77.5946,12.9716'
+                  profile: cycling
+                  contours_minutes: '15'
+        description: ''
+
+  /sheatmap:
+    get:
+      summary: Single Variable Heatmap
+      tags: 
+        - Heat Maps
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                x-examples:
+                  example-1:
+                    A_hex_ids:
+                      - 8861892f55fffff
+                    Max_Rank: '9'
+                    Rank:
+                      - 0
+                      - 0
+                      - 1
+                      - 1
+                    rest_count:
+                      - 0
+                      - 110
+                      - 121
+                      - 109
+                properties:
+                  Max_Rank:
+                    type: string
+                    minLength: 1
+                  A_hex_ids:
+                    type: array
+                    items:
+                      type: object
+                  Rank:
+                    type: array
+                    items:
+                      type: object
+                  rest_count:
+                    type: array
+                    items:
+                      type: object
+                required:
+                  - Max_Rank
+                  - A_hex_ids
+                  - Rank
+                  - rest_count
+              examples:
+                Sample Response:
+                  value:
+                    Max_Rank: '2'
+                    A_hex_ids:
+                      - 8861892f55fffff
+                      - 8861892017fffff
+                      - 886016975bfffff
+                      - 8860169759fffff
+                      - 8860169657fffff
+                    Rank:
+                      - 1
+                      - 1
+                      - 2
+                      - 2
+                    rest_count:
+                      - 1
+                      - 1
+                      - 2
+                      - 2
+      operationId: get-sheatmap
+      description: 'This endpoint aids in making choropleth maps based on Single Variables Hex Ids and count. '
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: var
+          description: Variable for Heatmap Generation
+          required: true
+  /get_apps:
+    post:
+      summary: Customer Segmentation
+      operationId: post-get_apps
+      tags: 
+        - Custom Polygon Data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  Bank of India Visitors:
+                    type: number
+                  Bata Visitors:
+                    type: number
+                  Beauty:
+                    type: number
+                  Cinemas Visitors:
+                    type: number
+                  DATING:
+                    type: number
+                  Education:
+                    type: number
+                  Family Leisure Enthusiasts:
+                    type: number
+                  Frequent Coffee Shop Visitors:
+                    type: number
+                  HEALTH AND FITNESS:
+                    type: number
+                  Holistic Health:
+                    type: number
+                  In-Market Motorcycle Buyers:
+                    type: number
+                  In-market Electronics Buyer:
+                    type: number
+                  MUSIC GAMES:
+                    type: number
+                  PUZZLE GAMES:
+                    type: number
+                  Pregnancy And Sexual Health Visitors:
+                    type: number
+                  Real Estate Agency And Showroom Visitors:
+                    type: number
+                  Society:
+                    type: number
+                  Sporting Goods Shoppers:
+                    type: number
+                  The Body Shop Visitors:
+                    type: number
+                  Tourist Diners:
+                    type: number
+                required:
+                  - Bank of India Visitors
+                  - Bata Visitors
+                  - Beauty
+                  - Cinemas Visitors
+                  - DATING
+                  - Education
+                  - Family Leisure Enthusiasts
+                  - Frequent Coffee Shop Visitors
+                  - HEALTH AND FITNESS
+                  - Holistic Health
+                  - In-Market Motorcycle Buyers
+                  - In-market Electronics Buyer
+                  - MUSIC GAMES
+                  - PUZZLE GAMES
+                  - Pregnancy And Sexual Health Visitors
+                  - Real Estate Agency And Showroom Visitors
+                  - Society
+                  - Sporting Goods Shoppers
+                  - The Body Shop Visitors
+                  - Tourist Diners
+                x-examples:
+                  example-1:
+                    Bank of India Visitors: 2800614
+                    Bata Visitors: 981816
+                    Beauty: 1396084
+                    Cinemas Visitors: 2099777
+                    DATING: 881376
+                    Education: 1757531
+                    Family Leisure Enthusiasts: 806735
+                    Frequent Coffee Shop Visitors: 2091270
+                    HEALTH AND FITNESS: 1049635
+                    Holistic Health: 1056092
+                    In-Market Motorcycle Buyers: 1749528
+                    In-market Electronics Buyer: 1751070
+                    MUSIC GAMES: 798296
+                    PUZZLE GAMES: 807257
+                    Pregnancy And Sexual Health Visitors: 1046407
+                    Real Estate Agency And Showroom Visitors: 1401683
+                    Society: 1050376
+                    Sporting Goods Shoppers: 1746863
+                    The Body Shop Visitors: 1044967
+                    Tourist Diners: 838436
+              examples:
+                Sample Response:
+                  value:
+                    Bank of India Visitors: 2800614
+                    Bata Visitors: 981816
+                    Beauty: 1396084
+                    Cinemas Visitors: 2099777
+                    DATING: 881376
+                    Education: 1757531
+                    Family Leisure Enthusiasts: 806735
+                    Frequent Coffee Shop Visitors: 2091270
+                    HEALTH AND FITNESS: 1049635
+                    Holistic Health: 1056092
+                    In-Market Motorcycle Buyers: 1749528
+                    In-market Electronics Buyer: 1751070
+                    MUSIC GAMES: 798296
+                    PUZZLE GAMES: 807257
+                    Pregnancy And Sexual Health Visitors: 1046407
+                    Real Estate Agency And Showroom Visitors: 1401683
+                    Society: 1050376
+                    Sporting Goods Shoppers: 1746863
+                    The Body Shop Visitors: 1044967
+                    Tourist Diners: 838436
+      description: This Api Fetches Customer Segmentation Data for Custom Polygon.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                coordinates:
+                  type: array
+                  uniqueItems: true
+                  minItems: 1
+                  items:
+                    required:
+                      - lat
+                      - lng
+                    properties:
+                      lat:
+                        type: number
+                      lng:
+                        type: number
+              required:
+                - coordinates
+              x-examples:
+                example-1:
+                  coordinates:
+                    - lat: 13.388617618153711
+                      lng: 77.57514029874933
+                    - lat: 12.81883149952699
+                      lng: 77.03310705621149
+                    - lat: 12.752539132573569
+                      lng: 77.59368896484375
+            examples:
+              Sample Request:
+                value:
+                  coordinates:
+                    - lat: 13.388617618153711
+                      lng: 77.57514029874933
+                    - lat: 12.81883149952699
+                      lng: 77.03310705621149
+                    - lat: 12.752539132573569
+                      lng: 77.59368896484375
+
+  /post_json_vhmap:
+    post:
+      summary: Multivariable Heatmap
+      operationId: Multivariable Heatmap
+      tags: 
+        - Heat Maps
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  Hex_ids:
+                    type: array
+                    items:
+                      required: []
+                      properties: {}
+                  Max_Rank:
+                    type: string
+                    minLength: 1
+                  Rank:
+                    type: array
+                    items:
+                      required: []
+                      properties: {}
+                required:
+                  - Hex_ids
+                  - Max_Rank
+                  - Rank
+                x-examples:
+                  example-1:
+                    Hex_ids:
+                      - 88618920c3fffff
+                      - 8860145a63fffff
+                      - 88618922a7fffff
+                      - 8861892da1fffff
+                    Max_Rank: '0'
+                    Rank:
+                      - 0
+                      - 0
+                      - 0
+                      - 0
+              examples:
+                Sample Response:
+                  value:
+                    Hex_ids:
+                      - 8861892e59fffff
+                      - 8860169617fffff
+                      - 8861892459fffff
+                      - 8861892f5dfffff
+                    Max_Rank: '0'
+                    Rank:
+                      - 0
+                      - 0
+                      - 0
+                      - 0
+      description: This Endpoint fetches data for plotting choropleth for multivariables.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                weights:
+                  type: array
+                  items:
+                    required: []
+                    properties: {}
+              required:
+                - weights
+              x-examples:
+                example-1:
+                  weights:
+                    - 1
+                    - 1
+                    - 1
+                    - 1
+                    - 1
+                    - 1
+            examples:
+              Sample Request:
+                value:
+                  weights:
+                    - 1
+                    - 1
+                    - 1
+                    - 1
+                    - 1
+                    - 1
+
+  /similar_n:
+    post:
+      summary: Similar Neighborhood
+      operationId: post-similar_n
+      tags:
+        - Similar Neighborhood
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  master_append:
+                    type: array
+                    items:
+                      required: []
+                      properties: {}
+                required:
+                  - master_append
+                x-examples:
+                  example-1:
+                    master_append: []
+              examples:
+                Sample Resopnse:
+                  value:
+                    master_append:
+                      - - - 77.58896592815042
+                          - 13.023315824799317
+                        - - 77.58745428438132
+                          - 13.023619763462706
+                      - - - 77.58896592815042
+                          - 13.023315824799312
+                        - - 77.58745428438132
+                          - 13.023619763462705
+      description: This endpoint returns polygons that share same propeties as that of custom drawn polygon.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                coordinates:
+                  type: array
+                  uniqueItems: true
+                  minItems: 1
+                  items:
+                    required:
+                      - lat
+                      - lng
+                    properties:
+                      lat:
+                        type: number
+                      lng:
+                        type: number
+              required:
+                - coordinates
+              x-examples:
+                example-1:
+                  coordinates:
+                    - lat: 13.388617618153711
+                      lng: 77.57514029874933
+                    - lat: 12.81883149952699
+                      lng: 77.03310705621149
+                    - lat: 12.752539132573569
+                      lng: 77.59368896484375
+            examples:
+              Sample Request:
+                value:
+                  coordinates:
+                    - lat: 13.388617618153711
+                      lng: 77.57514029874933
+                    - lat: 12.81883149952699
+                      lng: 77.03310705621149
+                    - lat: 12.752539132573569
+                      lng: 77.59368896484375
+
+  /homelocation:
+    post:
+      summary: /homelocation
+      operationId: Home Location Finder 
+      tags: 
+        - Home Location Finder
+      responses:
+        '200': 
+          description: "SUCCESS"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Mobile_Ad_Id:
+                    type: array
+                    description : "Mobile AD ID of the people"
+                  Gender:
+                    type: array
+                    description : "Gender of the people"
+                  Device:
+                    type: array
+                    description : "Device type of the people"
+                  GenZ:
+                    type: array
+                    description : "GenZ status of the people"
+                  Health Enthusiast:
+                    type: array
+                    description : "Health Enthusiasm status of the people"
+                  Male_count:
+                    type: number
+                    description : "Total male count found in the custom polygon"
+                  Female_count:
+                    type: number
+                    description : "Total female count found in the custom polygon"
+              examples:
+                Sample Response:
+                  value:
+                    Mobile_Ad_Id: 
+                      - "ABCD"
+                      - "DEFG"
+                    Gender:
+                      - MALE
+                      - FEMAAlE
+                    Device:
+                      - IOS
+                      - Android
+                    GenZ:
+                      - Yes
+                      - No
+                    Health Enthisiast:
+                      - No
+                      - Yes
+                    Male_count: "1"
+                    Female_count: "1"
+        '400': 
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: 'Message string will contain validation error message.'
+              examples:
+                Sample Response:
+                  value:
+                    message: 'Need to provide the coordiantes.'
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filter_by:
+                  type: object
+                  description: Filter by result using genz, ios and health variables
+                  x-nullable: true
+                  properties:
+                    genz:
+                      type : string
+                      default : 
+                      enum : 
+                        - Yes 
+                        - No
+                      description : "GenZ status of the people"
+                    ios:
+                      type : string
+                      default : 
+                      enum : 
+                        - Yes 
+                        - No
+                      description : "IOS Device type of the people"
+                    health:
+                      type: string
+                      default : 
+                      enum : 
+                        - Yes 
+                        - No
+                      description : "Health Enthusiasm status of the people"
+                coordinates:
+                  type: array
+                  description : Geometry of the custom polygon
+                  uniqueItems: true
+                  minItems: 1
+                  items:
+                    required:
+                      - longitude
+                      - latitude
+                    properties:
+                      longitude:
+                        type: number 
+                        description : Longitude of the point              
+                      latitude:
+                        type: number
+                        description : Latitude of the point
+              required:
+                - coordinates
+            examples:
+              Sample Request:
+                value:
+                  filter_by:
+                    GenZ : "No"
+                    Ios : "Yes"
+                  coordinates:
+                    - latitude: 77.61174827814102
+                      longitude: 12.935334392490226
+                    - latitude: 77.61136204004288
+                      longitude: 12.935180157977092
+                    - latitude: 77.61105358600616
+                      longitude: 12.93500239604705
+                    - latitude: 77.61071026325226
+                      longitude: 12.93457890387987
+                    - latitude: 77.61053591966629
+                      longitude: 12.934239063966542
+                    - latitude: 77.61117428541183
+                      longitude: 12.933742374029716
+                    - latitude: 77.61149615049362
+                      longitude: 12.934231221501534
+                    - latitude: 77.61213719844817
+                      longitude: 12.934615501996769
+                    - latitude: 77.61174827814102
+                      longitude: 12.935334392490226
+      description: This endpoint will find, filter and return info of people who's home location is within a custom polygon.
+      parameters: []

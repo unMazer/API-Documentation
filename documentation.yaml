@@ -19,7 +19,7 @@ tags:
     description: These API Endpoint are used to retrieve footfall analysis data.
   - name: FootFall Task
     # x-displayName: Task
-    description: These API Endpoint are used to footfall analysis for a given Polygon. Polygon can be custom drawn by a user or output of the viewshed API.
+    description: This API Endpoint is used to submit request to perform footfall analysis for a given Polygon. Polygon can be custom drawn by a user or output of the viewshed API.
   - name: Viewshed Data
     # x-displayName: Data
     description: These API Endpoint are used to retrieve viewshed analysis data.
@@ -31,17 +31,25 @@ tags:
   - name : Heat Maps
   - name : Custom Polygon Data
   - name : Similar Neighborhood
+  - name : Tasks
+    description : Task related info can be retrieved using this Endpoint
 
 x-tagGroups:
   - name: FootFall Analysis
     tags:
       - FootFall Data
       - FootFall Task
+
     
   - name: Vewshed Analysis
     tags:
       - Viewshed Data
       - Viewshed Task
+    
+  - name: Task Status
+    tags: 
+      - Tasks
+
 
   - name: Spatial Analysis
     tags:
@@ -157,12 +165,11 @@ paths:
                       longitude: 12.935334392490226
       description: This Endpoint is to submit request to perform footfall analysis on a polygon using UnMazer.AI's Footfall Analysis API.
       parameters: []
-  /task/{task_id}:
+  /task/<task_id>:
     get:
       tags:
-        - FootFall Task
-        - Viewshed Task
-      summary: /task/{task_id}
+        - Tasks
+      summary: /task/<task_id>
       operationId: FootFall Analysis
       responses:
         '200': 
@@ -269,11 +276,12 @@ paths:
                     - 
       description: This Endpoint is to get list of place name from the database who's footfall analysis has been compeleted.
       parameters: []
-  /footfall/data/{place-name}:
+
+  /footfall/data/place-name:
     get:
       tags: 
         - FootFall Data 
-      summary: /footfall/data/{place-name}
+      summary: /footfall/data/<place-name>
       operationId: FootFall Analysis
       responses:
         '200': 
@@ -518,7 +526,7 @@ paths:
                                           type: 
                                             - "Longitude and Latitude"        
               examples:
-                PINGS FOUND:
+                Pings Found:
                   value:
                     place-name: 'location'
                     geometry: 
@@ -652,7 +660,7 @@ paths:
                               - 
                                 - 77.61136204004288
                                 -  12.935180157977092
-                PINGS NOT FOUND:
+                Pings Not Found:
                   value:
                     place-name: 'location'
                     geometry: 
@@ -695,7 +703,7 @@ paths:
               properties:
                 place_name:
                   type: string
-                  description: "Place Name to be retrieved"
+                  description: "Place Name who's Data is to be retrieved"
               required:
                 - place_name
             examples:
@@ -796,7 +804,6 @@ paths:
                   type: array
                   x-nullable: true
                   description: "Geometry of the store location"
-                  uniqueItems: true
                   items:
                     required:
                       - longitude
@@ -813,7 +820,6 @@ paths:
                   type: array
                   x-nullable: true
                   description: "Geometry of the competitor's store location"
-                  uniqueItems: true
                   items:
                     required:
                       - longitude
@@ -886,11 +892,11 @@ paths:
                     - 
       description: This Endpoint is to get list of place name from the database who's viewshed analysis has been compeleted.
       parameters: []
-  /viewshed/data/{place-name}:
+  /viewshed/data/<place-name>:
     get:
       tags: 
         - Viewshed Data 
-      summary: /viewshed/data/{place-name}
+      summary: /viewshed/data/<place-name>
       operationId: Viewshed Analysis
       responses:
         '200': 
@@ -1143,7 +1149,7 @@ paths:
               properties:
                 place_name:
                   type: string
-                  description: "Place Name to be retrieved"
+                  description: "Place Name who's data is to be retrieved"
               required:
                 - place_name
             examples:
@@ -1171,21 +1177,27 @@ paths:
                   Area:
                     type: string
                     minLength: 1
+                    description: Area of the custom polygon in km^2
                   Demographics:
                     type: object
+                    description: Demographics info of the custom polygon area
                     properties:
                       Female:
                         type: string
                         minLength: 1
+                        description: Female population count of the custom polygon area
                       Houses:
                         type: string
                         minLength: 1
+                        description: Total number of houses in the custom polygon area
                       Male:
                         type: string
                         minLength: 1
+                        description: Male population count of the custom polygon area
                       Population:
                         type: string
                         minLength: 1
+                        description: Total population of the custom polygon area
                     required:
                       - Female
                       - Houses
@@ -1193,42 +1205,55 @@ paths:
                       - Population
                   Infra:
                     type: object
+                    description: Infrastructure detail of the custom polygon area
                     properties:
                       Apartments:
                         type: string
+                        description: Total Apartment count inside the custom polygon area
                         minLength: 1
                       Bus Stops:
                         type: string
+                        description: Total Bus Stop count inside the custom polygon area
                         minLength: 1
                       Cinemas:
                         type: string
+                        description: Total Cinema count inside the custom polygon area
                         minLength: 1
                       Colleges:
                         type: string
+                        description: Total College count inside the custom polygon area
                         minLength: 1
                       Grocery_Stores:
                         type: string
+                        description: Total Grocery store count inside the custom polygon area
                         minLength: 1
                       Gyms:
                         type: string
+                        description: Total Gym count inside the custom polygon area
                         minLength: 1
                       Office Parks:
                         type: string
+                        description: Total Office Park count inside the custom polygon area
                         minLength: 1
                       Pan Shops:
                         type: string
+                        description: Total Pan Shop count inside the custom polygon area
                         minLength: 1
                       Police stations:
                         type: string
+                        description: Total Police Station count inside the custom polygon area
                         minLength: 1
                       Restaurants:
                         type: string
+                        description: Total Restaurant count inside the custom polygon area
                         minLength: 1
                       Sports Club:
                         type: string
+                        description: Total Sports club count inside the custom polygon area
                         minLength: 1
                       Warehouse and Godowns:
                         type: string
+                        description: Total Warehouse and Godowns count inside the custom polygon area
                         minLength: 1
                     required:
                       - Apartments
@@ -1247,27 +1272,6 @@ paths:
                   - Area
                   - Demographics
                   - Infra
-                x-examples:
-                  example-1:
-                    Area: '2133880086'
-                    Demographics:
-                      Female: '3431369'
-                      Houses: '2648272'
-                      Male: '3050565'
-                      Population: '6481934'
-                    Infra:
-                      Apartments: '41'
-                      Bus Stops: '1079'
-                      Cinemas: '124'
-                      Colleges: '1977'
-                      Grocery_Stores: '505'
-                      Gyms: '778'
-                      Office Parks: '18'
-                      Pan Shops: '399'
-                      Police stations: '109'
-                      Restaurants: '2061'
-                      Sports Club: '28'
-                      Warehouse and Godowns: '1707'
               examples:
                 Sample Response:
                   value:
@@ -1301,6 +1305,7 @@ paths:
                   type: array
                   uniqueItems: true
                   minItems: 1
+                  description: Coordinates of the custom polygon
                   items:
                     required:
                       - lat
@@ -1308,19 +1313,12 @@ paths:
                     properties:
                       lat:
                         type: number
+                        description: Latitude of the point
                       lng:
                         type: number
+                        description: Longitude of the point
               required:
                 - coordinates
-              x-examples:
-                example-1:
-                  coordinates:
-                    - lat: 13.388617618153711
-                      lng: 77.57514029874933
-                    - lat: 12.81883149952699
-                      lng: 77.03310705621149
-                    - lat: 12.752539132573569
-                      lng: 77.59368896484375
             examples:
               Sample Request:
                 value:
@@ -1353,32 +1351,41 @@ paths:
                 properties:
                   coordinates:
                     type: object
+                    description: Coordinates of the isochrone polygon
                     properties:
                       lat:
                         type: number
+                        description: Latitude of the point
                       lng:
                         type: number
+                        description: Longitude of the point
                     required:
                       - lat
                       - lng
                   data:
                     type: object
+                    description: Data of the isochrone polygon
                     properties:
                       Demographics:
                         type: object
+                        description: Demographics info of the custom polygon area
                         properties:
                           Female:
                             type: string
                             minLength: 1
+                            description: Female population count of the custom polygon area
                           Houses:
                             type: string
                             minLength: 1
+                            description: Total number of houses in the custom polygon area
                           Male:
                             type: string
                             minLength: 1
+                            description: Male population count of the custom polygon area
                           Population:
                             type: string
                             minLength: 1
+                            description: Total population of the custom polygon area
                         required:
                           - Female
                           - Houses
@@ -1386,42 +1393,55 @@ paths:
                           - Population
                       Infra:
                         type: object
+                        description: Infrastructure detail of the custom polygon area
                         properties:
                           Apartments:
                             type: string
+                            description: Total Apartment count inside the custom polygon area
                             minLength: 1
                           Bus Stops:
                             type: string
+                            description: Total Bus Stop count inside the custom polygon area
                             minLength: 1
                           Cinemas:
                             type: string
+                            description: Total Cinema count inside the custom polygon area
                             minLength: 1
                           Colleges:
                             type: string
+                            description: Total College count inside the custom polygon area
                             minLength: 1
                           Grocery_Stores:
                             type: string
+                            description: Total Grocery store count inside the custom polygon area
                             minLength: 1
                           Gyms:
                             type: string
+                            description: Total Gym count inside the custom polygon area
                             minLength: 1
                           Office Parks:
                             type: string
+                            description: Total Office Park count inside the custom polygon area
                             minLength: 1
                           Pan Shops:
                             type: string
+                            description: Total Pan Shop count inside the custom polygon area
                             minLength: 1
                           Police stations:
                             type: string
+                            description: Total Police Station count inside the custom polygon area
                             minLength: 1
                           Restaurants:
                             type: string
+                            description: Total Restaurant count inside the custom polygon area
                             minLength: 1
                           Sports Club:
                             type: string
+                            description: Total Sports club count inside the custom polygon area
                             minLength: 1
                           Warehouse and Godowns:
                             type: string
+                            description: Total Warehouse and Godowns count inside the custom polygon area
                             minLength: 1
                         required:
                           - Apartments
@@ -1442,30 +1462,6 @@ paths:
                 required:
                   - coordinates
                   - data
-                x-examples:
-                  example-1:
-                    coordinates:
-                      lat: 13.388617618153711
-                      lng: 77.57514029874933
-                    data:
-                      Demographics:
-                        Female: '4857320'
-                        Houses: '3476412'
-                        Male: '4379339'
-                        Population: '9236659'
-                      Infra:
-                        Apartments: '119'
-                        Bus Stops: '1850'
-                        Cinemas: '207'
-                        Colleges: '3667'
-                        Grocery_Stores: '1412'
-                        Gyms: '1575'
-                        Office Parks: '119'
-                        Pan Shops: '966'
-                        Police stations: '220'
-                        Restaurants: '6685'
-                        Sports Club: '48'
-                        Warehouse and Godowns: '1869'
               examples:
                 Sample Resonse:
                   value:
@@ -1502,21 +1498,23 @@ paths:
             schema:
               description: ''
               type: object
-              x-examples:
-                example-1:
-                  coordinates: '77.5946,12.9716'
-                  profile: cycling
-                  contours_minutes: '15'
               properties:
                 coordinates:
                   type: string
+                  description: Coordinates of the location in "`longitude`, `latitude`" format
                   minLength: 1
                 profile:
                   type: string
                   minLength: 1
+                  description: Mode of transportation
+                  enum : 
+                    - Walking
+                    - Cycling
+                    - Driving
                 contours_minutes:
                   type: string
                   minLength: 1
+                  description: Travel Time in mintues
             examples:
               Sample Request:
                 value:
@@ -1603,6 +1601,9 @@ paths:
           name: var
           description: Variable for Heatmap Generation
           required: true
+
+          
+
   /get_apps:
     post:
       summary: Customer Segmentation
@@ -1620,20 +1621,27 @@ paths:
                 properties:
                   Bank of India Visitors:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Bank of India
                   Bata Visitors:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Bata Store
                   Beauty:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Beauty shop
                   Cinemas Visitors:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Cinemas
                   DATING:
                     type: number
+                    description: Total count of people who live in the custom polygon and are currently dating
                   Education:
                     type: number
+                    description: Total count of people who live in the custom polygon and are currently studying
                   Family Leisure Enthusiasts:
                     type: number
                   Frequent Coffee Shop Visitors:
                     type: number
+                    description: Total count of people who live in the custom polygon and visit coffee shops frequently
                   HEALTH AND FITNESS:
                     type: number
                   Holistic Health:
@@ -1648,16 +1656,21 @@ paths:
                     type: number
                   Pregnancy And Sexual Health Visitors:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Pregnancy And Sexual Health Clinics
                   Real Estate Agency And Showroom Visitors:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Real Estate Agency And Showroom 
                   Society:
                     type: number
                   Sporting Goods Shoppers:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Sporting Goods shop
                   The Body Shop Visitors:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited Body shop visitors
                   Tourist Diners:
                     type: number
+                    description: Total count of people who live in the custom polygon and visited tourist diners.
                 required:
                   - Bank of India Visitors
                   - Bata Visitors
@@ -1679,28 +1692,6 @@ paths:
                   - Sporting Goods Shoppers
                   - The Body Shop Visitors
                   - Tourist Diners
-                x-examples:
-                  example-1:
-                    Bank of India Visitors: 2800614
-                    Bata Visitors: 981816
-                    Beauty: 1396084
-                    Cinemas Visitors: 2099777
-                    DATING: 881376
-                    Education: 1757531
-                    Family Leisure Enthusiasts: 806735
-                    Frequent Coffee Shop Visitors: 2091270
-                    HEALTH AND FITNESS: 1049635
-                    Holistic Health: 1056092
-                    In-Market Motorcycle Buyers: 1749528
-                    In-market Electronics Buyer: 1751070
-                    MUSIC GAMES: 798296
-                    PUZZLE GAMES: 807257
-                    Pregnancy And Sexual Health Visitors: 1046407
-                    Real Estate Agency And Showroom Visitors: 1401683
-                    Society: 1050376
-                    Sporting Goods Shoppers: 1746863
-                    The Body Shop Visitors: 1044967
-                    Tourist Diners: 838436
               examples:
                 Sample Response:
                   value:
@@ -1734,6 +1725,7 @@ paths:
               properties:
                 coordinates:
                   type: array
+                  description: Coordinates of the custom polygon
                   uniqueItems: true
                   minItems: 1
                   items:
@@ -1743,19 +1735,12 @@ paths:
                     properties:
                       lat:
                         type: number
+                        description: Latitude of the point
                       lng:
                         type: number
+                        description: Longitude of the point
               required:
                 - coordinates
-              x-examples:
-                example-1:
-                  coordinates:
-                    - lat: 13.388617618153711
-                      lng: 77.57514029874933
-                    - lat: 12.81883149952699
-                      lng: 77.03310705621149
-                    - lat: 12.752539132573569
-                      lng: 77.59368896484375
             examples:
               Sample Request:
                 value:
@@ -1799,19 +1784,6 @@ paths:
                   - Hex_ids
                   - Max_Rank
                   - Rank
-                x-examples:
-                  example-1:
-                    Hex_ids:
-                      - 88618920c3fffff
-                      - 8860145a63fffff
-                      - 88618922a7fffff
-                      - 8861892da1fffff
-                    Max_Rank: '0'
-                    Rank:
-                      - 0
-                      - 0
-                      - 0
-                      - 0
               examples:
                 Sample Response:
                   value:
@@ -1841,15 +1813,6 @@ paths:
                     properties: {}
               required:
                 - weights
-              x-examples:
-                example-1:
-                  weights:
-                    - 1
-                    - 1
-                    - 1
-                    - 1
-                    - 1
-                    - 1
             examples:
               Sample Request:
                 value:
@@ -1878,14 +1841,15 @@ paths:
                 properties:
                   master_append:
                     type: array
+                    description : Coordinates of one or more polygons that are similar to custom polygon passed in the request. Each array signifies different polygon and each polygon array contains array of coordinates. 
                     items:
-                      required: []
-                      properties: {}
+                      type : array
+                      items:
+                        type : array
+                        items: 
+                          type : "Longitude and Latitude"
                 required:
                   - master_append
-                x-examples:
-                  example-1:
-                    master_append: []
               examples:
                 Sample Resopnse:
                   value:
@@ -1908,6 +1872,7 @@ paths:
               properties:
                 coordinates:
                   type: array
+                  description: Coordinates of the custom polygon
                   uniqueItems: true
                   minItems: 1
                   items:
@@ -1917,19 +1882,12 @@ paths:
                     properties:
                       lat:
                         type: number
+                        description : Latitude of the point
                       lng:
                         type: number
+                        description : Longitude of the point
               required:
                 - coordinates
-              x-examples:
-                example-1:
-                  coordinates:
-                    - lat: 13.388617618153711
-                      lng: 77.57514029874933
-                    - lat: 12.81883149952699
-                      lng: 77.03310705621149
-                    - lat: 12.752539132573569
-                      lng: 77.59368896484375
             examples:
               Sample Request:
                 value:
@@ -1958,18 +1916,28 @@ paths:
                   Mobile_Ad_Id:
                     type: array
                     description : "Mobile AD ID of the people"
+                    items:
+                      type: string
                   Gender:
                     type: array
                     description : "Gender of the people"
+                    items:
+                      type: string
                   Device:
                     type: array
                     description : "Device type of the people"
+                    items:
+                      type: string
                   GenZ:
                     type: array
                     description : "GenZ status of the people"
+                    items:
+                      type: string
                   Health Enthusiast:
                     type: array
                     description : "Health Enthusiasm status of the people"
+                    items:
+                      type: string
                   Male_count:
                     type: number
                     description : "Total male count found in the custom polygon"

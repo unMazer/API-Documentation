@@ -1,0 +1,53 @@
+site_name: Documentation - unMazer
+site_url: https://docs.unmazer.ai
+site_description: >-
+  This is the official product documentation for Unmazer.ai. Leverage our API,
+  for your specific use-case
+
+repo_name: unMazer/API-Documentation
+repo_url: https://github.com/unmazer/api-documentation
+
+extra_css:
+  - assets/css/extra.css
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - API Reference: https://spatialdocs.unmazer.ai/
+  - MMI Data Explorer: https://mmiexp.herokuapp.com/
+
+theme:
+  name: material
+  language: en
+  logo: assets/images/logo.png
+  favicon: assets/images/logo.png
+  features:
+    - navigation.tabs
+    - navigation.sections
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/unmazer
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/unmazer
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/company/unmazer

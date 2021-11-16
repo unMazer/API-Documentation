@@ -10,11 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - uses: seeebiii/redoc-cli-github-action@v10
-        with:
-          args: "bundle openapi.yml -o docs/openapi.html"
-      - run: pip install mkdocs-material
-      - run: mkdocs gh-deploy --force
+      - name: Install dependencies
+        run: |
+          npm install --global redoc-cli
+          pip install mkdocs-material
+      - name: Build and deploy documentation
+        run: |
+          redoc-cli bundle openapi.yml -o docs/openapi.html
+          mkdocs gh-deploy --force

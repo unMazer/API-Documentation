@@ -1,0 +1,69 @@
+# Project information
+site_name: Documentation
+site_url: https://docs.unmazer.ai
+site_description: >-
+  This is the official product documentation for Unmazer.ai. Leverage our API,
+  for your specific use-case.
+
+# Repository information (shown on the top right corner)
+repo_name: unMazer/docs
+repo_url: https://github.com/unmazer/api-documentation
+edit_uri: ""
+
+extra_css:
+  - assets/css/extra.css
+
+# Markdown extensions
+# https://python-markdown.github.io/extensions/
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - API Reference: openapi.html
+  - MMI Data Explorer: https://mmiexp.herokuapp.com/
+
+# Theme configuration
+# https://squidfunk.github.io/mkdocs-material/
+theme:
+  name: material
+  language: en
+  logo: assets/images/logo.png
+  favicon: assets/images/logo.png
+  features:
+    - navigation.tabs
+    - navigation.sections
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/unmazer
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/unmazer
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/unmazer.ai/
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/unmazerai
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/company/unmazer
